@@ -1,0 +1,446 @@
+  <!DOCTYPE html>
+  <html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Q2 Survival Analysis Report</title>
+    <style>
+      :root {
+        --bg: #f6f1e8;
+        --card: #fffaf2;
+        --ink: #1f1a17;
+        --muted: #6b625c;
+        --line: #d8cdbf;
+        --accent: #a64b2a;
+        --accent-soft: #f2dfd3;
+        --code: #2b2522;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Georgia", "Times New Roman", "Noto Serif SC", serif;
+        background:
+          radial-gradient(circle at top left, #f4e6d8 0%, transparent 30%),
+          linear-gradient(180deg, #f9f4ec 0%, var(--bg) 100%);
+        color: var(--ink);
+        line-height: 1.75;
+      }
+
+      .<img {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+      }
+
+      .hero {
+        background: linear-gradient(135deg, #fff7ef 0%, #f4e7d8 100%);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 42px 32px;
+        box-shadow: 0 10px 30px rgba(60, 35, 20, 0.06);
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      h1 {
+        margin: 0 0 16px;
+        font-size: clamp(34px, 5vw, 56px);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        margin: 0;
+        max-width: 760px;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .meta {
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+      }
+
+      .meta-card {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px 16px;
+      }
+
+      .meta-card strong {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .section {
+        margin-top: 28px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 28px 26px;
+        box-shadow: 0 8px 24px rgba(40, 24, 10, 0.04);
+      }
+
+      h2 {
+        margin-top: 0;
+        margin-bottom: 14px;
+        font-size: 28px;
+        line-height: 1.2;
+      }
+
+      h3 {
+        margin-top: 24px;
+        margin-bottom: 10px;
+        font-size: 20px;
+      }
+
+      p {
+        margin: 12px 0;
+      }
+
+      ul {
+        padding-left: 22px;
+      }
+
+      li {
+        margin: 6px 0;
+      }
+
+      .figure {
+        margin: 22px 0;
+        padding: 16px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+      }
+
+      .figure img {
+        width: 100%;
+        border-radius: 12px;
+        display: block;
+      }
+
+      .caption {
+        margin-top: 10px;
+        font-size: 14px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .callout {
+        padding: 16px 18px;
+        border-left: 4px solid var(--accent);
+        background: #fff4eb;
+        border-radius: 12px;
+        margin: 18px 0;
+      }
+
+      code, pre {
+        font-family: "Consolas", "Courier New", monospace;
+      }
+
+      pre {
+        background: var(--code);
+        color: #f6f2ef;
+        padding: 16px;
+        border-radius: 14px;
+        overflow-x: auto;
+        font-size: 14px;
+      }
+
+      .footer {
+        margin-top: 28px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+
+      @media (max-width: 760px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+
+        .hero,
+        .section {
+          padding: 22px 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="eyebrow">STA323 · Project 1 · Q2</div>
+        <h1>Survival Analysis for Churn and Lifetime Value</h1>
+        <p class="subtitle">
+          本文记录了我基于 Databricks survival-analysis 教程完成的生存分析案例。
+          研究目标是分析客户流失（customer churn）的时间分布、影响因素，以及客户留存对商业价值的影响。
+        </p>
+
+        <div class="meta">
+          <div class="meta-card">
+            <strong>Dataset</strong>
+            IBM Telco Customer Churn
+          </div>
+          <div class="meta-card">
+            <strong>Methods</strong>
+            Kaplan-Meier, CoxPH, AFT
+          </div>
+          <div class="meta-card">
+            <strong>Focus</strong>
+            Churn Timing + CLV / NPV
+          </div>
+          <div class="meta-card">
+            <strong>Tools</strong>
+            Spark, pandas, lifelines
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>1. Background</h2>
+        <p>
+          在传统的 churn prediction 中，问题通常被简化成一个二分类任务：客户是否会流失。
+          但这种方式忽略了一个很重要的问题：<strong>客户会在什么时候流失</strong>。
+          生存分析（survival analysis）正好适合解决这一类问题，因为它可以同时考虑事件是否发生以及事件发生的时间。
+        </p>
+        <p>
+          在本案例中，事件（event）定义为客户流失，生存时间（survival time）定义为客户在流失前持续存续的月份数。
+          对于在观测结束时仍未流失的客户，则视为删失样本（censored observations）。
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>2. Data Preparation</h2>
+        <p>
+          本案例使用 <strong>IBM Telco Customer Churn</strong> 数据集。按照原始教程的处理思路，
+          我首先用 Spark 读入原始 CSV 数据，再进行筛选与清洗。
+        </p>
+
+        <h3>主要预处理步骤</h3>
+        <ul>
+          <li>将 <code>Churn</code> 转换为二元事件变量 <code>churn</code></li>
+          <li>将 <code>tenure</code> 作为持续时间变量</li>
+          <li>聚焦于 <code>Month-to-month</code> 合同客户</li>
+          <li>去掉没有互联网服务的客户</li>
+          <li>将 <code>TotalCharges</code> 转换为数值</li>
+          <li>对类别变量进行 one-hot encoding 以支持后续建模</li>
+        </ul>
+
+        <div class="callout">
+          这样处理后的数据更适合研究 churn 的时间动态，因为月度合同客户的流失行为更频繁、更具有分析意义。
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>3. Kaplan-Meier Survival Analysis</h2>
+        <p>
+          Kaplan-Meier estimator 用于估计客户在不同时间点仍然未流失的概率。
+          通过整体 survival curve，可以直观看到客户留存概率如何随时间下降。
+        </p>
+
+        <div class="figure">
+          <img src="images/kaplan_meier_curve.png" alt="Kaplan-Meier Survival Curve">
+          <div class="caption">Figure 1. Kaplan-Meier Survival Curve</div>
+        </div>
+
+        <p>
+          从 Kaplan-Meier 曲线可以看出，随着 tenure 增加，客户仍然留存的概率持续下降。
+          这一结果说明 churn 并不是一个单纯的“会不会发生”的问题，而是具有明确时间结构的过程。
+        </p>
+
+        <h3>关键结果</h3>
+        <ul>
+          <li>Median survival time 约为 <strong>34 个月</strong></li>
+          <li>客户留存概率在前期下降较快，之后逐渐趋缓</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>4. Group Comparison and Log-rank Test</h2>
+        <p>
+          为了进一步比较不同客户群体之间的 churn 差异，我按照 <code>OnlineSecurity</code> 分组绘制了 Kaplan-Meier 曲线，
+          并使用 log-rank test 检验组间差异是否显著。
+        </p>
+
+        <div class="figure">
+          <img src="images/km_by_OnlineSecurity.png" alt="Kaplan-Meier by Online Security">
+          <div class="caption">Figure 2. Kaplan-Meier Curves by OnlineSecurity</div>
+        </div>
+
+        <p>
+          结果表明，不同 <code>OnlineSecurity</code> 组别之间的生存曲线差异非常显著。
+          这意味着是否拥有在线安全服务，与客户的 churn 时间分布存在明显关系。
+        </p>
+
+        <div class="callout">
+          Log-rank test 的极小 p-value 说明这些分组差异不是随机噪声，而是具有统计显著性的结构性差异。
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>5. Cox Proportional Hazards Model</h2>
+        <p>
+          Kaplan-Meier 更偏描述性分析，而 Cox proportional hazards model 则可以在多变量条件下，
+          定量分析哪些因素会提高或降低 churn hazard。
+        </p>
+
+        <div class="figure">
+          <img src="images/cox_coefficients.png" alt="Cox Coefficients">
+          <div class="caption">Figure 3. Cox Proportional Hazards Coefficients</div>
+        </div>
+
+        <h3>主要发现</h3>
+        <ul>
+          <li><code>InternetService_Fiber optic</code> 与更高的 churn hazard 相关</li>
+          <li><code>PaymentMethod_Electronic check</code> 与更高的 churn hazard 相关</li>
+          <li><code>OnlineSecurity_Yes</code>、<code>OnlineBackup_Yes</code>、<code>TechSupport_Yes</code> 与更低的
+  churn hazard 相关</li>
+          <li>部分变量显示较强统计显著性，说明它们在控制其他变量后仍然重要</li>
+        </ul>
+
+        <p>
+          这些结果表明，附加服务的使用情况和支付方式都与 churn 风险存在明显联系。
+          某些服务可能提高了客户粘性，而某些支付方式或资费结构则可能伴随更高流失风险。
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>6. Proportional Hazards Assumption</h2>
+        <p>
+          Cox 模型依赖 proportional hazards assumption，即不同变量对 hazard 的相对影响在时间维度上保持稳定。
+          在本案例中，这一假设并不是对所有变量都完全成立。
+        </p>
+
+        <p>
+          这意味着 CoxPH 虽然很有解释力，但它并不一定是唯一合适的模型。因此，继续引入
+          Accelerated Failure Time（AFT）模型是合理的。
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>7. Accelerated Failure Time Model</h2>
+        <p>
+          AFT 模型直接建模“事件发生时间”，而不是瞬时风险函数，因此更适合从客户生命周期长度的角度进行解释。
+        </p>
+
+        <p>
+          在本案例中，我比较了三种 AFT 模型：
+        </p>
+        <ul>
+          <li>Log-Logistic AFT</li>
+          <li>Weibull AFT</li>
+          <li>Log-Normal AFT</li>
+        </ul>
+
+        <p>
+          根据 AIC 比较结果，<strong>Weibull AFT</strong> 的表现最好。这说明在当前数据和特征处理下，
+          Weibull 分布更适合描述 churn 的时间结构。
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>8. Customer Lifetime Value and NPV</h2>
+        <p>
+          Survival analysis 的一个重要优势是，它不仅能研究 churn，还可以进一步与商业价值结合。
+          在本案例中，我根据 survival probability 估计了未来每个月的 expected monthly profit，
+          再进一步计算 NPV（Net Present Value）和 cumulative NPV。
+        </p>
+
+        <div class="figure">
+          <img src="images/clv_npv_curves.png" alt="CLV and NPV Curves">
+          <div class="caption">Figure 4. Predicted Survival Probability and Cumulative NPV</div>
+        </div>
+
+        <p>
+          结果表明，客户存续概率随着时间下降，而累计净现值则随着时间逐步增长。
+          这说明 retention 不只是统计问题，也直接关系到客户的长期商业价值。
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>9. Conclusion</h2>
+        <p>
+          本案例展示了 survival analysis 在 churn 问题中的完整应用流程：
+        </p>
+        <ul>
+          <li>使用 Spark 做数据准备</li>
+          <li>使用 Kaplan-Meier 描述总体留存趋势</li>
+          <li>使用 log-rank test 检验不同群体的生存差异</li>
+          <li>使用 CoxPH 模型识别重要风险因素</li>
+          <li>使用 AFT 模型补充对时间尺度的解释</li>
+          <li>将 survival model 结果延伸到 CLV / NPV 的商业分析</li>
+        </ul>
+
+        <div class="callout">
+          相比简单的二分类 churn 预测，生存分析不仅回答“客户会不会流失”，还回答“客户什么时候流失”以及“这种时间差异如何影
+  响客户价值”。
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>10. References</h2>
+        <ul>
+          <li>
+            Databricks Industry Solutions.
+            <em>survival-analysis</em>.
+            <a href="https://github.com/databricks-industry-solutions/survival-analysis" target="_blank">GitHub
+  Repository</a>
+          </li>
+          <li>
+            Databricks Notebook.
+            <em>Survival Analysis for Churn and Lifetime Value</em>.
+            <a href="https://notebooks.databricks.com/notebooks/CME/Survival_Analysis/index.html" target="_blank">Online
+  Notebook</a>
+          </li>
+          <li>
+            IBM.
+            <em>Telco Customer Churn Dataset</em>.
+            <a href="https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-
+  Churn.csv" target="_blank">Dataset Link</a>
+          </li>
+        </ul>
+      </section>
+
+      <div class="footer">
+        Survival Analysis Blog · GitHub Pages
+      </div>
+    </main>
+  </body>
+  </html>
